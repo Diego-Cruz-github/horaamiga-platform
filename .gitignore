@@ -42,3 +42,7 @@ tmp/
 
 # Notas internas (nao publicas)
 NOTES_INTERNAL*
+
+# Ansible - inventario e vars com dados reais
+ansible/inventory.ini
+ansible/group_vars/all.yml
