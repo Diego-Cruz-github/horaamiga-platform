@@ -44,6 +44,7 @@ no formato Architecture Decision Record:
 
 - [0001 - Hetzner em vez de hyperscaler](docs/decisions/0001-hetzner-em-vez-de-hyperscaler.md)
 - [0002 - Gestao de segredos](docs/decisions/0002-gestao-de-segredos.md)
+- [0003 - IaC com Terraform e Ansible](docs/decisions/0003-iac-terraform-e-ansible.md)
 
 ## Estrutura do repositorio
 
