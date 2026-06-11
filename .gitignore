@@ -1,0 +1,44 @@
+# Segredos e ambiente - NUNCA versionar
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+id_rsa*
+id_ed25519*
+kubeconfig*
+*.tfvars
+!*.tfvars.example
+
+# Estado do Terraform (contem dados sensiveis)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Credenciais e cofres
+secrets/
+credentials/
+*-credentials.json
+service-account*.json
+
+# Dados e backups
+*.sql
+*.dump
+backups/
+*.tar.gz
+
+# Dependencias e build
+node_modules/
+dist/
+build/
+
+# Logs e temporarios
+*.log
+logs/
+tmp/
+.DS_Store
+
+# Notas internas (nao publicas)
+NOTES_INTERNAL*
