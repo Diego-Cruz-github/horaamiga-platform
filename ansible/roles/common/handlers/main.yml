@@ -1,0 +1,7 @@
+# Handlers: tarefas que so rodam quando algo as "notifica" (ex: mudou config do SSH).
+# Evita reiniciar servico a toa - so reinicia se a config realmente mudou.
+
+- name: Reiniciar SSH
+  ansible.builtin.service:
+    name: ssh
+    state: restarted

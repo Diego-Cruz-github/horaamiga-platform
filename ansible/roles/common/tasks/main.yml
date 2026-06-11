@@ -1,0 +1,69 @@
+# Role common: base e hardening do servidor.
+# E a fundacao de seguranca que vem antes de qualquer aplicacao.
+
+- name: Atualizar indice de pacotes
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Instalar pacotes base
+  ansible.builtin.apt:
+    name:
+      - ufw          # firewall do host (defesa em profundidade, junto do firewall da Hetzner)
+      - fail2ban     # bane IP que tenta brute-force de SSH
+      - curl
+      - git
+      - unattended-upgrades  # patches de seguranca automaticos
+    state: present
+
+# Usuario nao-root pra operar (nunca trabalhar como root direto).
+- name: Criar usuario de deploy
+  ansible.builtin.user:
+    name: deploy
+    groups: sudo
+    shell: /bin/bash
+    create_home: true
+
+- name: Autorizar chave SSH do admin no usuario deploy
+  ansible.posix.authorized_key:
+    user: deploy
+    key: "{{ lookup('file', ssh_public_key) }}"
+  vars:
+    ssh_public_key: "~/.ssh/id_ed25519.pub"
+
+# Hardening do SSH: sem senha (so chave) e sem login direto de root.
+- name: Endurecer configuracao do SSH
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/99-hardening.conf
+    content: |
+      PermitRootLogin no
+      PasswordAuthentication no
+      PubkeyAuthentication yes
+    mode: "0644"
+  notify: Reiniciar SSH
+
+# UFW: politica padrao nega tudo, abre so o necessario.
+- name: UFW - negar entrada por padrao
+  community.general.ufw:
+    direction: incoming
+    policy: deny
+
+- name: UFW - permitir SSH, HTTP e HTTPS
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - "22"
+    - "80"
+    - "443"
+
+- name: UFW - ativar
+  community.general.ufw:
+    state: enabled
+
+- name: Garantir fail2ban ativo
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true
