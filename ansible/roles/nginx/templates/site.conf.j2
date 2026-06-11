@@ -1,0 +1,59 @@
+# Template do Nginx (Jinja2). Variaveis {{ }} sao preenchidas pelo Ansible.
+# Versao base/sanitizada da config real - foco na estrutura, nao em segredos.
+#
+# A plataforma tem DOIS frontends servidos pelo mesmo servidor:
+#   - Site institucional   -> horaamiga.pt (estatico, multilingue PT/EN/ES)
+#   - Aplicacao (PWA + API) -> app.horaamiga.pt (PWA estatico + /api no Node)
+
+# HTTP -> HTTPS pros dois dominios (o Certbot completa os blocos 443 com os certificados).
+server {
+    listen 80;
+    server_name {{ domain }} www.{{ domain }} {{ app_subdomain }}.{{ domain }};
+    return 301 https://$host$request_uri;
+}
+
+# --- Site institucional (horaamiga.pt) ---
+server {
+    listen 443 ssl http2;
+    server_name {{ domain }} www.{{ domain }};
+
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Conteudo estatico do site (HTML/CSS/JS, sem framework).
+    root /var/www/horaamiga/site;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+
+# --- Aplicacao: PWA + API (app.horaamiga.pt) ---
+server {
+    listen 443 ssl http2;
+    server_name {{ app_subdomain }}.{{ domain }};
+
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Estaticos do PWA (Service Worker, manifest, etc.).
+    root /var/www/horaamiga/app;
+    index index.html;
+
+    # SPA/PWA: rotas do front caem no index.html.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # API encaminhada pro Node (PM2 escutando local na 3000).
+    location /api/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

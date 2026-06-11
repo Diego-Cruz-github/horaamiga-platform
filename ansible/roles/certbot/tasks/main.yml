@@ -1,0 +1,24 @@
+# Role certbot: SSL gratuito (Let's Encrypt) com renovacao automatica.
+
+- name: Instalar Certbot e o plugin do Nginx
+  ansible.builtin.apt:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+
+# Emite o certificado pros dominios e ajusta o Nginx automaticamente.
+# creates: so roda se o certificado ainda nao existe (idempotente).
+- name: Emitir certificado SSL
+  ansible.builtin.command: >
+    certbot --nginx --non-interactive --agree-tos
+    -m {{ admin_email }}
+    -d {{ domain }} -d www.{{ domain }} -d {{ app_subdomain }}.{{ domain }}
+  args:
+    creates: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
+
+# A renovacao ja vem agendada pelo pacote (timer do systemd). Aqui so garantimos
+# que o teste de renovacao passa - se falhar, o certificado venceria sem aviso.
+- name: Validar que a renovacao automatica funciona
+  ansible.builtin.command: certbot renew --dry-run
+  changed_when: false

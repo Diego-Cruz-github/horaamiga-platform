@@ -1,0 +1,25 @@
+# Role node: runtime da aplicacao (Node.js LTS + PM2).
+
+- name: Adicionar repositorio NodeSource (Node 20 LTS)
+  ansible.builtin.shell: |
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  args:
+    creates: /etc/apt/sources.list.d/nodesource.list  # idempotencia: so roda se ainda nao existe
+
+- name: Instalar Node.js
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+    update_cache: true
+
+# PM2: gerenciador de processos. Mantem a API viva (restart automatico em crash)
+# e roda em cluster (varias instancias usando os nucleos da CPU).
+- name: Instalar PM2 globalmente
+  community.general.npm:
+    name: pm2
+    global: true
+
+- name: Configurar PM2 pra iniciar no boot do servidor
+  ansible.builtin.shell: pm2 startup systemd -u deploy --hp /home/deploy
+  args:
+    creates: /etc/systemd/system/pm2-deploy.service
