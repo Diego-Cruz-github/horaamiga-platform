@@ -1,5 +1,5 @@
-# Configuracao dos providers. Os tokens chegam por variavel (terraform.tfvars
-# ou variavel de ambiente TF_VAR_hcloud_token), nunca hardcoded aqui.
+# Provider configuration. Tokens arrive via variables (terraform.tfvars or the
+# TF_VAR_hcloud_token environment variable), never hardcoded here.
 
 provider "hcloud" {
   token = var.hcloud_token

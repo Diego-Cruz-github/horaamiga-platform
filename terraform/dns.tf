@@ -1,18 +1,18 @@
-# Registros DNS na Cloudflare apontando os dominios pro servidor.
-# proxied = true faz o trafego passar pela Cloudflare (CDN + WAF + esconde o IP
-# de origem). E o que coloca a protecao na frente da aplicacao.
+# Cloudflare DNS records pointing the domains at the server.
+# proxied = true routes traffic through Cloudflare (CDN + WAF + hides the
+# origin IP). This is what puts the protection in front of the application.
 
-# Dominio raiz -> servidor (site institucional).
+# Root domain -> server (institutional website).
 resource "cloudflare_record" "root" {
   zone_id = var.cloudflare_zone_id
   name    = "@"
   type    = "A"
   content = hcloud_server.prod.ipv4_address
   proxied = true
-  comment = "Site institucional - gerenciado por Terraform"
+  comment = "Institutional website - managed by Terraform"
 }
 
-# www -> servidor.
+# www -> server.
 resource "cloudflare_record" "www" {
   zone_id = var.cloudflare_zone_id
   name    = "www"
@@ -21,12 +21,12 @@ resource "cloudflare_record" "www" {
   proxied = true
 }
 
-# Subdominio da aplicacao (PWA + API).
+# Application subdomain (PWA + API).
 resource "cloudflare_record" "app" {
   zone_id = var.cloudflare_zone_id
   name    = var.app_subdomain
   type    = "A"
   content = hcloud_server.prod.ipv4_address
   proxied = true
-  comment = "PWA + API - gerenciado por Terraform"
+  comment = "PWA + API - managed by Terraform"
 }

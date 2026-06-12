@@ -1,18 +1,18 @@
-# Versoes do Terraform e dos providers.
-# Travar versao evita que um "terraform init" futuro puxe uma versao nova que
-# quebre a sintaxe. Pratica obrigatoria em infra de producao.
+# Terraform and provider versions.
+# Pinning versions prevents a future "terraform init" from pulling a newer
+# release that breaks syntax. Mandatory practice for production infrastructure.
 
 terraform {
   required_version = ">= 1.6"
 
   required_providers {
-    # Provider da Hetzner Cloud (provisiona servidor, firewall, ssh key).
+    # Hetzner Cloud provider (provisions server, firewall, ssh key).
     hcloud = {
       source  = "hetznercloud/hcloud"
-      version = "~> 1.45" # ~> trava o major: aceita 1.45.x ate 1.x, nao pula pra 2.0
+      version = "~> 1.45" # ~> pins the major: accepts 1.45.x..1.x, never jumps to 2.0
     }
 
-    # Provider da Cloudflare (gerencia os registros DNS dos dominios).
+    # Cloudflare provider (manages the DNS records for the domains).
     cloudflare = {
       source  = "cloudflare/cloudflare"
       version = "~> 4.0"

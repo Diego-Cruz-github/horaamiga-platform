@@ -1,17 +1,18 @@
-# Playbook de configuracao do servidor HoraAmiga.
-# Roda DEPOIS do Terraform criar a VM. Idempotente: pode rodar quantas vezes
-# quiser que converge pro mesmo estado (so muda o que estiver diferente).
+# HoraAmiga server configuration playbook.
+# Runs AFTER Terraform creates the VM. Idempotent: run it as many times as you
+# want and it converges to the same state (only changes what differs).
 #
-# Uso: ansible-playbook playbook.yml
-# Conferir sem aplicar (dry-run): ansible-playbook playbook.yml --check
+# Setup:  ansible-galaxy collection install -r requirements.yml
+# Run:    ansible-playbook playbook.yml
+# Dry-run (check without applying): ansible-playbook playbook.yml --check
 #
-# Organizado em roles (cada role e um pedaco da configuracao):
-#   common  -> hardening base (usuario, UFW, fail2ban, sysctl)
+# Organized in roles (each role owns one slice of the configuration):
+#   common  -> base hardening (user, UFW, fail2ban)
 #   node    -> Node.js + PM2
 #   nginx   -> reverse proxy + sites
-#   certbot -> SSL Let's Encrypt automatico
+#   certbot -> automated Let's Encrypt SSL
 
-- name: Configurar servidor de producao HoraAmiga
+- name: Configure HoraAmiga production server
   hosts: web
   become: true
 

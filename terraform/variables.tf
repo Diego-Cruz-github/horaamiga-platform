@@ -1,66 +1,66 @@
-# Variaveis de entrada. Os valores reais ficam em terraform.tfvars (NUNCA versionado).
-# Tokens sao marcados como sensitive pra nao vazarem no output/log do plan.
+# Input variables. Real values live in terraform.tfvars (NEVER committed).
+# Tokens are marked sensitive so they do not leak into plan output/logs.
 
 variable "hcloud_token" {
-  description = "Token da API da Hetzner Cloud (Read/Write)"
+  description = "Hetzner Cloud API token (Read/Write)"
   type        = string
   sensitive   = true
 }
 
 variable "cloudflare_api_token" {
-  description = "Token da API da Cloudflare com permissao de editar DNS da zona"
+  description = "Cloudflare API token with DNS edit permission on the zone"
   type        = string
   sensitive   = true
 }
 
 variable "cloudflare_zone_id" {
-  description = "ID da zona Cloudflare do dominio"
+  description = "Cloudflare zone ID for the domain"
   type        = string
 }
 
 variable "domain" {
-  description = "Dominio raiz da plataforma"
+  description = "Root domain of the platform"
   type        = string
   default     = "horaamiga.pt"
 }
 
 variable "app_subdomain" {
-  description = "Subdominio da aplicacao (PWA + API)"
+  description = "Application subdomain (PWA + API)"
   type        = string
   default     = "app"
 }
 
 variable "server_name" {
-  description = "Nome do servidor na Hetzner"
+  description = "Server name on Hetzner"
   type        = string
   default     = "horaamiga-prod"
 }
 
 variable "server_type" {
-  description = "Tipo da VM Hetzner. cx22 = 2 vCPU / 4GB. Redimensionar conforme a observabilidade mostrar uso real (rightsizing)."
+  description = "Hetzner VM type. cx22 = 2 vCPU / 4GB. Resize as observability shows real usage (rightsizing)."
   type        = string
   default     = "cx22"
 }
 
 variable "server_location" {
-  description = "Datacenter. Alemanha (nbg1/fsn1) para manter os dados na UE (GDPR)."
+  description = "Datacenter. Germany (nbg1/fsn1) to keep data in the EU (GDPR)."
   type        = string
   default     = "nbg1"
 }
 
 variable "server_image" {
-  description = "Imagem base do servidor"
+  description = "Base server image"
   type        = string
   default     = "ubuntu-24.04"
 }
 
 variable "ssh_public_key_path" {
-  description = "Caminho da chave SSH publica que tera acesso ao servidor"
+  description = "Path to the SSH public key that will have access to the server"
   type        = string
   default     = "~/.ssh/id_ed25519.pub"
 }
 
 variable "admin_ip" {
-  description = "IP autorizado a acessar SSH (porta 22). Restringe o acesso administrativo em vez de abrir pra internet inteira."
+  description = "IP allowed to reach SSH (port 22). Restricts admin access instead of opening it to the whole internet."
   type        = string
 }

@@ -1,5 +1,5 @@
 {
-  "__comment": "Dashboard base do HoraAmiga (dashboard-as-code: versionado no Git, nao editado na mao na UI). Importavel no Grafana. Foco nas metricas RED da API.",
+  "__comment": "HoraAmiga base dashboard (dashboard as code: versioned in Git, not hand-edited in the UI). Importable into Grafana. Focused on the API's RED metrics.",
   "title": "HoraAmiga - Overview",
   "schemaVersion": 39,
   "panels": [

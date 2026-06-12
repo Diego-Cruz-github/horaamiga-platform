@@ -1,12 +1,12 @@
-# Copie para terraform.tfvars e preencha (terraform.tfvars NUNCA e versionado).
-# Alternativa: exportar como variavel de ambiente, ex: export TF_VAR_hcloud_token=...
+# Copy to terraform.tfvars and fill in (terraform.tfvars is NEVER committed).
+# Alternative: export as environment variables, e.g. export TF_VAR_hcloud_token=...
 
-hcloud_token         = "<token-hetzner>"
-cloudflare_api_token = "<token-cloudflare>"
-cloudflare_zone_id   = "<zone-id-do-dominio>"
+hcloud_token         = "<hetzner-token>"
+cloudflare_api_token = "<cloudflare-token>"
+cloudflare_zone_id   = "<domain-zone-id>"
 
-admin_ip = "<seu-ip-publico>" # ex: 203.0.113.10
+admin_ip = "<your-public-ip>" # e.g. 203.0.113.10
 
-# Opcionais (tem default em variables.tf):
+# Optional (defaults in variables.tf):
 # server_type = "cx22"
 # server_location = "nbg1"

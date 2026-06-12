@@ -1,4 +1,4 @@
-# Segredos e ambiente - NUNCA versionar
+# Secrets and environment - NEVER commit
 .env
 .env.*
 !.env.example
@@ -11,38 +11,38 @@ kubeconfig*
 *.tfvars
 !*.tfvars.example
 
-# Estado do Terraform (contem dados sensiveis)
+# Terraform state (contains sensitive data)
 *.tfstate
 *.tfstate.*
 .terraform/
 .terraform.lock.hcl
 
-# Credenciais e cofres
+# Credentials
 secrets/
 credentials/
 *-credentials.json
 service-account*.json
 
-# Dados e backups
+# Data and backups
 *.sql
 *.dump
 backups/
 *.tar.gz
 
-# Dependencias e build
+# Dependencies and build
 node_modules/
 dist/
 build/
 
-# Logs e temporarios
+# Logs and temp
 *.log
 logs/
 tmp/
 .DS_Store
 
-# Notas internas (nao publicas)
+# Internal notes (not public)
 NOTES_INTERNAL*
 
-# Ansible - inventario e vars com dados reais
+# Ansible - inventory and host vars with real data
 ansible/inventory.ini
 ansible/group_vars/all.yml

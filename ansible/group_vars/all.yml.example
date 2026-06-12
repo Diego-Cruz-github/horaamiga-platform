@@ -1,5 +1,5 @@
-# Copie para group_vars/all.yml e ajuste. Sem segredos aqui - so configuracao.
+# Copy to group_vars/all.yml and adjust. No secrets here - configuration only.
 
 domain: horaamiga.pt
 app_subdomain: app
-admin_email: <email-para-avisos-do-lets-encrypt>
+admin_email: <email-for-lets-encrypt-notices>

@@ -1,6 +1,7 @@
-# Recarrega o Nginx sem derrubar conexoes (reload, nao restart) e so quando a config muda.
+# Reloads Nginx without dropping connections (reload, not restart), and only
+# when the config actually changed.
 
-- name: Recarregar Nginx
+- name: Reload Nginx
   ansible.builtin.service:
     name: nginx
     state: reloaded

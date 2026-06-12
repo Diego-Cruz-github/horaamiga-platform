@@ -1,38 +1,38 @@
-# Role common: base e hardening do servidor.
-# E a fundacao de seguranca que vem antes de qualquer aplicacao.
+# Role common: server baseline and hardening.
+# The security foundation that comes before any application.
 
-- name: Atualizar indice de pacotes
+- name: Update package index
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
 
-- name: Instalar pacotes base
+- name: Install base packages
   ansible.builtin.apt:
     name:
-      - ufw          # firewall do host (defesa em profundidade, junto do firewall da Hetzner)
-      - fail2ban     # bane IP que tenta brute-force de SSH
+      - ufw          # host firewall (defense in depth, alongside the Hetzner edge firewall)
+      - fail2ban     # bans IPs that brute-force SSH
       - curl
       - git
-      - unattended-upgrades  # patches de seguranca automaticos
+      - unattended-upgrades  # automatic security patches
     state: present
 
-# Usuario nao-root pra operar (nunca trabalhar como root direto).
-- name: Criar usuario de deploy
+# Non-root user for operations (never work as root directly).
+- name: Create deploy user
   ansible.builtin.user:
     name: deploy
     groups: sudo
     shell: /bin/bash
     create_home: true
 
-- name: Autorizar chave SSH do admin no usuario deploy
+- name: Authorize the admin SSH key for the deploy user
   ansible.posix.authorized_key:
     user: deploy
     key: "{{ lookup('file', ssh_public_key) }}"
   vars:
     ssh_public_key: "~/.ssh/id_ed25519.pub"
 
-# Hardening do SSH: sem senha (so chave) e sem login direto de root.
-- name: Endurecer configuracao do SSH
+# SSH hardening: no passwords (key-only) and no direct root login.
+- name: Harden SSH configuration
   ansible.builtin.copy:
     dest: /etc/ssh/sshd_config.d/99-hardening.conf
     content: |
@@ -40,15 +40,15 @@
       PasswordAuthentication no
       PubkeyAuthentication yes
     mode: "0644"
-  notify: Reiniciar SSH
+  notify: Restart SSH
 
-# UFW: politica padrao nega tudo, abre so o necessario.
-- name: UFW - negar entrada por padrao
+# UFW: default-deny inbound, open only what is needed.
+- name: UFW - deny incoming by default
   community.general.ufw:
     direction: incoming
     policy: deny
 
-- name: UFW - permitir SSH, HTTP e HTTPS
+- name: UFW - allow SSH, HTTP and HTTPS
   community.general.ufw:
     rule: allow
     port: "{{ item }}"
@@ -58,11 +58,11 @@
     - "80"
     - "443"
 
-- name: UFW - ativar
+- name: UFW - enable
   community.general.ufw:
     state: enabled
 
-- name: Garantir fail2ban ativo
+- name: Ensure fail2ban is running
   ansible.builtin.service:
     name: fail2ban
     state: started

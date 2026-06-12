@@ -1,35 +1,35 @@
-# Regras de alerta. Quando a condicao fica verdadeira por X tempo, dispara.
-# Para um servico de cuidado a idosos, "a API caiu" e alerta critico.
+# Alert rules. When the condition holds for X time, the alert fires.
+# For an elderly-care service, "the API is down" is a critical alert.
 
 groups:
   - name: horaamiga
     rules:
-      # API fora do ar.
+      # API down.
       - alert: ApiDown
         expr: up{job="horaamiga-api"} == 0
         for: 1m
         labels:
           severity: critical
         annotations:
-          summary: "API do HoraAmiga fora do ar"
-          description: "O scrape da API falhou por mais de 1 minuto."
+          summary: "HoraAmiga API is down"
+          description: "Scraping the API has failed for more than 1 minute."
 
-      # Latencia alta (p95 acima de 1s) - metrica RED: Duration.
+      # High latency (p95 above 1s) - RED metric: Duration.
       - alert: HighLatency
         expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
         for: 5m
         labels:
           severity: warning
         annotations:
-          summary: "Latencia p95 acima de 1s"
-          description: "A API esta lenta nos ultimos 5 minutos."
+          summary: "p95 latency above 1s"
+          description: "The API has been slow for the last 5 minutes."
 
-      # Taxa de erro 5xx alta - metrica RED: Errors.
+      # High 5xx error rate - RED metric: Errors.
       - alert: HighErrorRate
         expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
         for: 5m
         labels:
           severity: warning
         annotations:
-          summary: "Taxa de erro 5xx elevada"
-          description: "Mais de 5% das requisicoes retornando erro de servidor."
+          summary: "Elevated 5xx error rate"
+          description: "More than 5% of requests are returning server errors."

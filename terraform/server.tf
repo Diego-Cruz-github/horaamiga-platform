@@ -1,19 +1,19 @@
-# Servidor de producao + firewall na borda da Hetzner.
-# Isto codifica a infra que hoje existe na Hetzner, tornando-a reproduzivel:
-# em vez de configurar na mao, "terraform apply" recria o servidor do zero.
+# Production server + edge firewall on Hetzner.
+# This codifies the infrastructure that exists today, making it reproducible:
+# instead of hand-configuring, "terraform apply" recreates the server from scratch.
 
-# Chave SSH cadastrada na conta Hetzner e injetada no servidor no boot.
+# SSH key registered on the Hetzner account and injected into the server at boot.
 resource "hcloud_ssh_key" "admin" {
   name       = "horaamiga-admin"
   public_key = file(var.ssh_public_key_path)
 }
 
-# Firewall aplicado na borda (antes do trafego chegar na VM).
-# Principio: abrir o minimo. 80/443 pro mundo (site/app), 22 so pro admin.
+# Firewall applied at the edge (before traffic reaches the VM).
+# Principle: open the minimum. 80/443 to the world (site/app), 22 admin-only.
 resource "hcloud_firewall" "web" {
   name = "horaamiga-fw"
 
-  # SSH restrito ao IP do admin (nao expor 22 pra internet inteira).
+  # SSH restricted to the admin IP (do not expose 22 to the whole internet).
   rule {
     direction  = "in"
     protocol   = "tcp"
@@ -21,7 +21,7 @@ resource "hcloud_firewall" "web" {
     source_ips = ["${var.admin_ip}/32"]
   }
 
-  # HTTP - so existe pra redirecionar pra HTTPS (Nginx faz o 301).
+  # HTTP - exists only to redirect to HTTPS (Nginx does the 301).
   rule {
     direction  = "in"
     protocol   = "tcp"
@@ -29,7 +29,7 @@ resource "hcloud_firewall" "web" {
     source_ips = ["0.0.0.0/0", "::/0"]
   }
 
-  # HTTPS - o trafego real da aplicacao.
+  # HTTPS - the application's real traffic.
   rule {
     direction  = "in"
     protocol   = "tcp"
@@ -38,7 +38,7 @@ resource "hcloud_firewall" "web" {
   }
 }
 
-# A VM em si.
+# The VM itself.
 resource "hcloud_server" "prod" {
   name        = var.server_name
   server_type = var.server_type
@@ -48,8 +48,8 @@ resource "hcloud_server" "prod" {
   ssh_keys     = [hcloud_ssh_key.admin.id]
   firewall_ids = [hcloud_firewall.web.id]
 
-  # Backups automaticos da Hetzner (snapshot da VM inteira).
-  # Complementa o backup logico de dados feito por cron no servidor.
+  # Hetzner automated backups (full VM snapshots).
+  # Complements the logical data backup done by cron on the server.
   backups = true
 
   labels = {

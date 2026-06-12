@@ -1,32 +1,32 @@
-# Role nginx: reverse proxy na frente da aplicacao.
-# Serve os estaticos (site/PWA) e encaminha /api pro Node (PM2).
+# Role nginx: reverse proxy in front of the application.
+# Serves the static assets (site/PWA) and forwards /api to Node (PM2).
 
-- name: Instalar Nginx
+- name: Install Nginx
   ansible.builtin.apt:
     name: nginx
     state: present
 
-- name: Publicar configuracao dos sites
+- name: Publish site configuration
   ansible.builtin.template:
     src: site.conf.j2
     dest: /etc/nginx/sites-available/horaamiga.conf
     mode: "0644"
-  notify: Recarregar Nginx
+  notify: Reload Nginx
 
-- name: Habilitar o site
+- name: Enable the site
   ansible.builtin.file:
     src: /etc/nginx/sites-available/horaamiga.conf
     dest: /etc/nginx/sites-enabled/horaamiga.conf
     state: link
-  notify: Recarregar Nginx
+  notify: Reload Nginx
 
-- name: Remover site default do Nginx
+- name: Remove the default Nginx site
   ansible.builtin.file:
     path: /etc/nginx/sites-enabled/default
     state: absent
-  notify: Recarregar Nginx
+  notify: Reload Nginx
 
-- name: Garantir Nginx ativo
+- name: Ensure Nginx is running
   ansible.builtin.service:
     name: nginx
     state: started

@@ -1,12 +1,12 @@
-# Saidas uteis apos o apply. O IP do servidor alimenta o inventory do Ansible
-# (a etapa seguinte: Terraform cria a VM, Ansible configura por dentro).
+# Useful outputs after apply. The server IP feeds the Ansible inventory
+# (next step: Terraform creates the VM, Ansible configures the inside).
 
 output "server_ipv4" {
-  description = "IP publico do servidor de producao"
+  description = "Public IP of the production server"
   value       = hcloud_server.prod.ipv4_address
 }
 
 output "server_status" {
-  description = "Status atual do servidor"
+  description = "Current server status"
   value       = hcloud_server.prod.status
 }

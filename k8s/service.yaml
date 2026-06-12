@@ -1,15 +1,15 @@
-# Service: da um endereco estavel pros pods da API.
-# Pods morrem e nascem com IPs diferentes; o Service e o "recepcionista" fixo que
-# sabe onde os pods vivos estao e distribui o trafego entre eles.
+# Service: gives the API pods a stable address.
+# Pods die and respawn with different IPs; the Service is the fixed "front desk"
+# that knows where the live pods are and load-balances across them.
 apiVersion: v1
 kind: Service
 metadata:
   name: horaamiga-api
   namespace: horaamiga
 spec:
-  type: ClusterIP            # so acessivel dentro do cluster; o Ingress expoe pra fora
+  type: ClusterIP            # reachable only inside the cluster; the Ingress exposes it
   selector:
-    app: horaamiga-api       # manda trafego pros pods com este label
+    app: horaamiga-api       # routes traffic to pods with this label
   ports:
     - port: 80
-      targetPort: 3000       # porta do container
+      targetPort: 3000       # container port

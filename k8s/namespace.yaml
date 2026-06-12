@@ -1,5 +1,5 @@
-# Namespace isola os recursos do HoraAmiga dentro do cluster.
-# Ajuda a separar ambientes (ex: horaamiga, horaamiga-staging) e aplicar quotas/policies.
+# Namespace isolates HoraAmiga resources inside the cluster.
+# Helps separate environments (e.g. horaamiga, horaamiga-staging) and apply quotas/policies.
 apiVersion: v1
 kind: Namespace
 metadata:
