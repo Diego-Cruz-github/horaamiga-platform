@@ -1,16 +1,16 @@
-# docker-compose para DESENVOLVIMENTO LOCAL.
-# Sobe a API igual a producao (mesma imagem), facilitando testar antes de deployar.
-# Os segredos vem de um .env local (nao versionado).
+# docker-compose for LOCAL DEVELOPMENT.
+# Runs the API the same way production does (same image), making it easy to
+# test before deploying. Secrets come from a local .env (not committed).
 
 services:
   api:
     build:
-      context: ..
+      context: ..                  # repo root (the root .dockerignore applies)
       dockerfile: docker/Dockerfile
     ports:
       - "3000:3000"
     env_file:
-      - ../.env        # arquivo local, fora do Git
+      - ../.env                    # local file, outside Git
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
@@ -18,6 +18,6 @@ services:
       timeout: 3s
       retries: 3
 
-# Nota: em producao o banco e gerenciado (Supabase/PostgreSQL UE), entao nao sobe
-# container de banco aqui. Para um ambiente local 100% isolado, daria pra adicionar
-# um servico "postgres" - mantido fora pra refletir a arquitetura real.
+# Note: in production the database is managed (Supabase/PostgreSQL EU), so no
+# database container here. For a fully isolated local environment a "postgres"
+# service could be added - left out to mirror the real architecture.

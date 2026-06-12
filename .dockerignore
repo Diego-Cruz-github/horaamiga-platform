@@ -1,0 +1,20 @@
+# Lives at the repository root because the build context is the root
+# (docker build -f docker/Dockerfile .). Keeps the image small and prevents
+# secrets from leaking into the build context.
+node_modules
+npm-debug.log
+.env
+.env.*
+.git
+.gitignore
+docker-compose.yml
+*.md
+tests
+coverage
+.vscode
+terraform
+ansible
+k8s
+observability
+docs
+scripts

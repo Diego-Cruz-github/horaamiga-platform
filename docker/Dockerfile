@@ -1,36 +1,40 @@
-# Dockerfile multi-stage da API (Node.js).
-# Multi-stage = dois estagios: um pra instalar/buildar (pesado) e outro so com o
-# que roda (leve). A imagem final nao carrega ferramenta de build = menor e mais segura.
+# Multi-stage Dockerfile for the API (Node.js).
+# Multi-stage = two stages: one installs/builds (heavy), the other only runs
+# (light). The final image carries no build tooling = smaller and safer.
 #
-# O site institucional e o PWA sao estaticos (servidos pelo Nginx/Ingress), entao
-# este Dockerfile e so da API.
+# The institutional website and the PWA are static (served by Nginx/Ingress),
+# so this Dockerfile covers the API only.
+#
+# Build from the repository root (the .dockerignore at the root applies):
+#   docker build -f docker/Dockerfile -t horaamiga-api:v1.0.0 .
 
-# --- Estagio 1: build (instala dependencias) ---
+# --- Stage 1: build (installs dependencies) ---
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copia so os manifests primeiro pra aproveitar cache: se package.json nao mudou,
-# o Docker reusa a camada de npm install (build muito mais rapido).
+# Copy only the manifests first to leverage layer cache: if package.json did
+# not change, Docker reuses the npm install layer (much faster builds).
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-COPY . .
+COPY src ./src
 
-# --- Estagio 2: runtime (so o necessario pra rodar) ---
+# --- Stage 2: runtime (only what is needed to run) ---
 FROM node:20-alpine
 WORKDIR /app
 
-# Usuario nao-root: se a app for comprometida, o atacante nao e root no container.
+# Non-root user: if the app is compromised, the attacker is not root in the container.
 RUN addgroup -S app && adduser -S app -G app
 
-# Traz so node_modules e codigo do estagio de build (sem cache de npm, sem dev deps).
+# Bring only what the runtime needs, explicitly (no build cache, no dev deps).
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app ./
+COPY --from=builder /app/src ./src
 
 USER app
 EXPOSE 3000
 
-# Health check no nivel do container: o orquestrador sabe se a app esta viva.
+# Container-level health check: the orchestrator knows whether the app is alive.
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
   CMD wget -qO- http://localhost:3000/api/health || exit 1
 
