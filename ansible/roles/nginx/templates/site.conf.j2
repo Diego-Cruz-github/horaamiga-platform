@@ -1,27 +1,26 @@
-# Template do Nginx (Jinja2). Variaveis {{ }} sao preenchidas pelo Ansible.
-# Versao base/sanitizada da config real - foco na estrutura, nao em segredos.
+# Nginx template (Jinja2). {{ }} variables are filled in by Ansible.
+# Base/sanitized version of the real config - structure over secrets.
 #
-# A plataforma tem DOIS frontends servidos pelo mesmo servidor:
-#   - Site institucional   -> horaamiga.pt (estatico, multilingue PT/EN/ES)
-#   - Aplicacao (PWA + API) -> app.horaamiga.pt (PWA estatico + /api no Node)
+# The platform serves TWO frontends from the same server:
+#   - Institutional website -> {{ domain }} (static, trilingual PT/EN/ES)
+#   - Application (PWA+API) -> {{ app_subdomain }}.{{ domain }} (static PWA + /api to Node)
+#
+# Bootstrap note (chicken-and-egg): these blocks listen on port 80 only, so the
+# config is valid BEFORE any certificate exists. The certbot role then runs
+# "certbot --nginx", which adds the 443/SSL blocks and the HTTP->HTTPS redirect
+# automatically. Editing this template later does not remove the certbot blocks.
 
-# HTTP -> HTTPS pros dois dominios (o Certbot completa os blocos 443 com os certificados).
+# --- Institutional website ({{ domain }}) ---
 server {
     listen 80;
-    server_name {{ domain }} www.{{ domain }} {{ app_subdomain }}.{{ domain }};
-    return 301 https://$host$request_uri;
-}
-
-# --- Site institucional (horaamiga.pt) ---
-server {
-    listen 443 ssl http2;
     server_name {{ domain }} www.{{ domain }};
 
+    # Basic security headers.
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
-    # Conteudo estatico do site (HTML/CSS/JS, sem framework).
+    # Static website content (HTML/CSS/JS, no framework).
     root /var/www/horaamiga/site;
     index index.html;
 
@@ -30,25 +29,25 @@ server {
     }
 }
 
-# --- Aplicacao: PWA + API (app.horaamiga.pt) ---
+# --- Application: PWA + API ({{ app_subdomain }}.{{ domain }}) ---
 server {
-    listen 443 ssl http2;
+    listen 80;
     server_name {{ app_subdomain }}.{{ domain }};
 
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
-    # Estaticos do PWA (Service Worker, manifest, etc.).
+    # PWA static assets (Service Worker, manifest, etc).
     root /var/www/horaamiga/app;
     index index.html;
 
-    # SPA/PWA: rotas do front caem no index.html.
+    # SPA/PWA: frontend routes fall back to index.html.
     location / {
         try_files $uri $uri/ /index.html;
     }
 
-    # API encaminhada pro Node (PM2 escutando local na 3000).
+    # API forwarded to Node (PM2 listening locally on 3000).
     location /api/ {
         proxy_pass http://127.0.0.1:3000;
         proxy_set_header Host $host;
