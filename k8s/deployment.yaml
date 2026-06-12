@@ -1,0 +1,53 @@
+# Deployment da API: diz ao Kubernetes COMO rodar a aplicacao e quantas copias manter.
+# Se um pod morre, o Deployment recria sozinho (auto-healing).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: horaamiga-api
+  namespace: horaamiga
+spec:
+  replicas: 2                      # 2 copias: tolera a queda de uma sem ficar offline
+  selector:
+    matchLabels:
+      app: horaamiga-api
+  template:
+    metadata:
+      labels:
+        app: horaamiga-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/diego-cruz-github/horaamiga-api:latest  # imagem vem do registry (CI builda e empurra)
+          ports:
+            - containerPort: 3000
+
+          # Requests/limits: requests = o que o pod reserva; limits = teto.
+          # Sem isso, um pod pode sufocar os outros no mesmo no.
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+
+          # Probes: o K8s precisa saber 2 coisas diferentes.
+          # readiness = "ja posso receber trafego?" (so entra no Service quando pronto)
+          # liveness  = "ainda estou vivo?" (se travar, o K8s reinicia o pod)
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+          # Segredos vem de um Secret do cluster (referencia, nunca o valor aqui).
+          envFrom:
+            - secretRef:
+                name: horaamiga-secrets   # criado fora do Git (ver secret.example.yaml)
