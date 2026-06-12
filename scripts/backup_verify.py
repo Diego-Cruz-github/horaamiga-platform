@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 """
-backup_verify.py - Verificacao de integridade dos backups automatizados
-Verifica se os backups foram criados nas ultimas 24h e se o tamanho esta dentro do esperado.
+backup_verify.py - Integrity check for automated backups.
+Verifies that backups were created in the last 24h and that their size is
+within the expected range. Exits non-zero on problems, so it can run under
+cron and feed alerting.
 """
 
-import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
-
 BACKUP_DIR = "/home/horaamiga/backups"
-MAX_AGE_HOURS = 25  # Backup deve ter menos de 25h
-MIN_SIZE_MB = 5     # Backup minimo esperado em MB
-RETENTION_DAYS = 7  # Manter backups dos ultimos 7 dias
+MAX_AGE_HOURS = 25  # the newest backup must be younger than 25h
+MIN_SIZE_MB = 5     # minimum expected backup size in MB
+RETENTION_DAYS = 7  # keep backups for the last 7 days
 
 
 def get_backup_files(backup_dir):
-    """Lista arquivos de backup ordenados por data de modificacao."""
+    """Lists backup files sorted by modification time (newest first)."""
     path = Path(backup_dir)
     if not path.exists():
         return []
@@ -25,52 +25,53 @@ def get_backup_files(backup_dir):
     backups = []
     for f in path.glob("*.tar.gz"):
         stat = f.stat()
+        modified = datetime.fromtimestamp(stat.st_mtime)
         backups.append({
             "name": f.name,
             "path": str(f),
             "size_mb": round(stat.st_size / (1024 * 1024), 2),
-            "modified": datetime.fromtimestamp(stat.st_mtime),
-            "age_hours": (datetime.now() - datetime.fromtimestamp(stat.st_mtime)).total_seconds() / 3600,
+            "modified": modified,
+            "age_hours": (datetime.now() - modified).total_seconds() / 3600,
         })
 
     return sorted(backups, key=lambda x: x["modified"], reverse=True)
 
 
 def verify_latest_backup(backups):
-    """Verifica se o backup mais recente e valido."""
+    """Validates the newest backup (age and size)."""
     if not backups:
-        print("[FAIL] Nenhum backup encontrado!")
+        print("[FAIL] No backups found!")
         return False
 
     latest = backups[0]
-    print(f"  Ultimo backup: {latest['name']}")
-    print(f"  Tamanho: {latest['size_mb']} MB")
-    print(f"  Idade: {latest['age_hours']:.1f} horas")
+    print(f"  Latest backup: {latest['name']}")
+    print(f"  Size: {latest['size_mb']} MB")
+    print(f"  Age: {latest['age_hours']:.1f} hours")
 
     issues = []
 
     if latest["age_hours"] > MAX_AGE_HOURS:
-        issues.append(f"Backup muito antigo ({latest['age_hours']:.1f}h > {MAX_AGE_HOURS}h)")
+        issues.append(f"Backup too old ({latest['age_hours']:.1f}h > {MAX_AGE_HOURS}h)")
 
     if latest["size_mb"] < MIN_SIZE_MB:
-        issues.append(f"Backup muito pequeno ({latest['size_mb']}MB < {MIN_SIZE_MB}MB)")
+        issues.append(f"Backup too small ({latest['size_mb']}MB < {MIN_SIZE_MB}MB)")
 
     if issues:
         for issue in issues:
             print(f"  [WARN] {issue}")
         return False
 
-    print("  [OK] Backup valido")
+    print("  [OK] Backup is valid")
     return True
 
 
 def check_retention(backups):
-    """Verifica politica de retencao de backups."""
+    """Reports backups beyond the retention window."""
     cutoff = datetime.now() - timedelta(days=RETENTION_DAYS)
     old_backups = [b for b in backups if b["modified"] < cutoff]
 
     if old_backups:
-        print(f"\n  [INFO] {len(old_backups)} backup(s) alem da retencao de {RETENTION_DAYS} dias")
+        print(f"\n  [INFO] {len(old_backups)} backup(s) beyond the {RETENTION_DAYS}-day retention")
         for b in old_backups:
             print(f"    - {b['name']} ({b['size_mb']}MB)")
 
@@ -78,13 +79,13 @@ def check_retention(backups):
 
 
 def run_verification(backup_dir):
-    """Executa verificacao completa dos backups."""
+    """Runs the full backup verification."""
     print(f"\n[{datetime.now().isoformat()}] Backup Verification")
     print(f"  Directory: {backup_dir}")
     print("-" * 60)
 
     backups = get_backup_files(backup_dir)
-    print(f"  Total backups encontrados: {len(backups)}")
+    print(f"  Backups found: {len(backups)}")
 
     is_valid = verify_latest_backup(backups)
     check_retention(backups)

@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """
-health_check.py - Verificacao de saude dos servicos em producao
-Monitora endpoints criticos e envia alertas via Telegram se algum servico cair.
+health_check.py - Production health verification.
+Monitors critical endpoints and sends a Telegram alert if any service is down.
+
+Credentials come from environment variables (never hardcoded):
+  TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 """
 
-import requests
+import os
 import sys
-import json
-from datetime import datetime
+from datetime import datetime, timezone
 
+import requests
 
 SERVICES = {
     "api": "/api/health",
@@ -16,12 +19,12 @@ SERVICES = {
     "database": "/api/health/db",
 }
 
-TELEGRAM_BOT_TOKEN = None  # Configurar via variavel de ambiente
-TELEGRAM_CHAT_ID = None
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 
 def check_endpoint(base_url, path, timeout=10):
-    """Verifica se um endpoint responde com status 200."""
+    """Checks whether an endpoint responds with HTTP 200."""
     url = f"{base_url}{path}"
     try:
         response = requests.get(url, timeout=timeout)
@@ -30,18 +33,18 @@ def check_endpoint(base_url, path, timeout=10):
             "status": response.status_code,
             "healthy": response.status_code == 200,
             "response_time_ms": int(response.elapsed.total_seconds() * 1000),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except requests.exceptions.Timeout:
         return {"url": url, "status": 0, "healthy": False, "error": "timeout"}
     except requests.exceptions.ConnectionError:
         return {"url": url, "status": 0, "healthy": False, "error": "connection_refused"}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - last-resort guard so one check never kills the run
         return {"url": url, "status": 0, "healthy": False, "error": str(e)}
 
 
 def send_telegram_alert(message):
-    """Envia alerta via Telegram bot."""
+    """Sends an alert through the Telegram bot."""
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
@@ -49,8 +52,8 @@ def send_telegram_alert(message):
 
 
 def run_health_check(base_url):
-    """Executa health check em todos os servicos configurados."""
-    print(f"\n[{datetime.utcnow().isoformat()}] Health Check - {base_url}")
+    """Runs the health check across all configured services."""
+    print(f"\n[{datetime.now(timezone.utc).isoformat()}] Health Check - {base_url}")
     print("-" * 60)
 
     all_healthy = True
@@ -66,10 +69,11 @@ def run_health_check(base_url):
 
         if not result["healthy"]:
             all_healthy = False
+            error_detail = result.get("error", f"HTTP {result['status']}")
             send_telegram_alert(
                 f"<b>ALERT</b> - {service_name} is DOWN\n"
                 f"URL: {result['url']}\n"
-                f"Error: {result.get('error', f'HTTP {result['status']}')}"
+                f"Error: {error_detail}"
             )
 
     print("-" * 60)
