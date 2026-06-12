@@ -24,13 +24,14 @@ platform engineering, sanitized: no secrets, no personal data.
 | Infrastructure | Hetzner (Germany, GDPR), Cloudflare (DNS/CDN/WAF) |
 | Provisioning | Terraform |
 | Configuration | Ansible |
-| Application | Node.js, Express, PostgreSQL (Supabase) |
+| Application | Node.js (Express) API + Python operational services, PostgreSQL (Supabase) |
 | Web server | Nginx (reverse proxy), Let's Encrypt SSL |
 | Process manager | PM2 (cluster mode) |
 | Containerization | Docker (multi-stage) |
 | Orchestration | Kubernetes (k3s) |
 | Observability | Prometheus, Grafana, Loki |
 | Automation | Python scripts (backup, health-check) |
+| Cloud portability | AWS / Azure / GCP service mapping and Terraform porting path ([multi-cloud.md](docs/architecture/multi-cloud.md)) |
 
 ## Architecture
 
