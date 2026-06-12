@@ -1,0 +1,8 @@
+# Copy to terraform.tfvars and fill in (terraform.tfvars is NEVER committed).
+# AWS credentials come from the environment (aws configure / AWS_PROFILE).
+
+admin_ip = "<your-public-ip>" # e.g. 203.0.113.10
+
+# Optional (defaults in variables.tf):
+# aws_region    = "eu-central-1"
+# instance_type = "t3.small"
