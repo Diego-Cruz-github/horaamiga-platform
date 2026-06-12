@@ -1,0 +1,39 @@
+{
+  "__comment": "Dashboard base do HoraAmiga (dashboard-as-code: versionado no Git, nao editado na mao na UI). Importavel no Grafana. Foco nas metricas RED da API.",
+  "title": "HoraAmiga - Overview",
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "title": "Request rate (RED: Rate)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(rate(http_requests_total[5m]))", "legendFormat": "req/s" }
+      ]
+    },
+    {
+      "title": "Error rate 5xx (RED: Errors)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m]))", "legendFormat": "errors/s" }
+      ]
+    },
+    {
+      "title": "Latency p95 (RED: Duration)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))", "legendFormat": "p95" }
+      ]
+    },
+    {
+      "title": "API up",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "up{job=\"horaamiga-api\"}", "legendFormat": "up" }
+      ]
+    }
+  ]
+}
