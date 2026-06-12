@@ -48,6 +48,7 @@ Architecture decisions are recorded in [`docs/decisions/`](docs/decisions/):
 - [0003 - IaC with Terraform and Ansible](docs/decisions/0003-iac-terraform-e-ansible.md)
 - [0004 - Containerization and Kubernetes (k3s)](docs/decisions/0004-containerizacao-e-kubernetes.md)
 - [0005 - Self-hosted observability](docs/decisions/0005-observabilidade-self-hosted.md)
+- [0006 - AWS as the single reference port](docs/decisions/0006-aws-como-port-de-referencia.md)
 
 ## Repository layout
 
