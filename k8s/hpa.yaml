@@ -1,0 +1,21 @@
+# HPA (Horizontal Pod Autoscaler): cria/remove pods automaticamente conforme a carga.
+# Precisa do metrics-server no cluster pra ler o uso de CPU.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: horaamiga-api
+  namespace: horaamiga
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: horaamiga-api
+  minReplicas: 2            # nunca abaixo de 2 (alta disponibilidade)
+  maxReplicas: 5            # teto pra nao estourar o no
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70   # passou de 70% de CPU media -> sobe mais pod

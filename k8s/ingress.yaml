@@ -1,0 +1,26 @@
+# Ingress: a porta de entrada HTTP(S) do cluster.
+# Roteia app.horaamiga.pt/api pro Service da API. TLS via cert-manager (Let's Encrypt).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: horaamiga-ingress
+  namespace: horaamiga
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod   # emite/renova o certificado automatico
+spec:
+  ingressClassName: traefik    # k3s ja vem com Traefik como ingress controller
+  tls:
+    - hosts:
+        - app.horaamiga.pt
+      secretName: horaamiga-tls
+  rules:
+    - host: app.horaamiga.pt
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: horaamiga-api
+                port:
+                  number: 80
