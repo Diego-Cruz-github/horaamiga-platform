@@ -1,4 +1,5 @@
 # HoraAmiga - Social Care Platform (Architecture & Infrastructure)
+> **English** | [Português (BR)](README.pt-BR.md)
 
 Social care platform for elderly people in Portugal: daily check-in and an
 emergency button, with cascading alerts to family members and volunteers.
