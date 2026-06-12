@@ -46,3 +46,7 @@ NOTES_INTERNAL*
 # Ansible - inventory and host vars with real data
 ansible/inventory.ini
 ansible/group_vars/all.yml
+
+# Python bytecode
+__pycache__/
+*.pyc
