@@ -1,0 +1,33 @@
+# Configuracao do Prometheus: define O QUE coletar e COM QUE frequencia.
+# Prometheus funciona por "scrape" - ele puxa as metricas de cada alvo de tempos em tempos.
+
+global:
+  scrape_interval: 15s          # coleta a cada 15s (padrao bom: granular sem pesar)
+  evaluation_interval: 15s
+
+# Onde mandar alertas (Alertmanager -> Telegram, reusando o bot que ja existe).
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+# Regras de alerta (ex: API fora do ar, latencia alta) ficam neste arquivo.
+rule_files:
+  - "alert.rules.yml"
+
+scrape_configs:
+  # O proprio Prometheus (saude dele mesmo).
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # A API do HoraAmiga expoe /metrics (via prom-client no Node).
+  - job_name: "horaamiga-api"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["horaamiga-api:3000"]
+
+  # Metricas do host (CPU/RAM/disco) via node_exporter.
+  - job_name: "node"
+    static_configs:
+      - targets: ["node-exporter:9100"]
