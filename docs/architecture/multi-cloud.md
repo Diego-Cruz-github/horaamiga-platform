@@ -32,9 +32,15 @@ fraction of the cost. See ADR 0001.
 
 ## Applying it on another cloud
 
-The Terraform code in this repo uses the Hetzner provider. Porting means writing
-the equivalent with the hyperscaler's provider (same logic: compute, network,
-DNS, Kubernetes). `terraform plan` shows the diff before applying; provisioning
+The live stack is codified with the Hetzner provider (`terraform/hetzner`). The
+**AWS port is implemented in [`terraform/aws`](../../terraform/aws)** - same
+architecture, AWS-native resources (EC2, Security Group mirroring the edge
+firewall, key pair, EU region for GDPR parity). The Ansible playbook is
+provider-agnostic: it takes whichever IP Terraform outputs and configures the
+server identically - only the provisioning layer changes.
+
+GCP and Azure follow the same pattern; the AWS port is the reference
+implementation. `terraform plan` shows the diff before applying; provisioning
 on free credits, validating and destroying gives the evidence without permanent
 cost.
 

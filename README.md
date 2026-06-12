@@ -31,7 +31,7 @@ platform engineering, sanitized: no secrets, no personal data.
 | Orchestration | Kubernetes (k3s) |
 | Observability | Prometheus, Grafana, Loki |
 | Automation | Python scripts (backup, health-check) |
-| Cloud portability | AWS / Azure / GCP service mapping and Terraform porting path ([multi-cloud.md](docs/architecture/multi-cloud.md)) |
+| Cloud portability | AWS Terraform port ([terraform/aws](terraform/aws)); GCP/Azure mapping ([multi-cloud.md](docs/architecture/multi-cloud.md)) |
 
 ## Architecture
 
@@ -56,8 +56,10 @@ Architecture decisions are recorded in [`docs/decisions/`](docs/decisions/):
 ├── docs/
 │   ├── architecture/      # Diagrams, component description, multi-cloud portability
 │   └── decisions/         # ADRs (Architecture Decision Records)
-├── terraform/             # Infrastructure provisioning (IaC)
-├── ansible/               # Server configuration (idempotent)
+├── terraform/
+│   ├── hetzner/           # Live infrastructure, codified (IaC)
+│   └── aws/               # AWS port of the same stack (portability)
+├── ansible/               # Server configuration (idempotent, provider-agnostic)
 ├── docker/                # Multi-stage Dockerfile + compose for local dev
 ├── k8s/                   # Kubernetes manifests (k3s): deployment, service, ingress, HPA
 ├── observability/         # Prometheus, Grafana dashboards, Loki, alert rules
