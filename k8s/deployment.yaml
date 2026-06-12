@@ -1,12 +1,12 @@
-# Deployment da API: diz ao Kubernetes COMO rodar a aplicacao e quantas copias manter.
-# Se um pod morre, o Deployment recria sozinho (auto-healing).
+# API Deployment: tells Kubernetes HOW to run the application and how many
+# copies to keep. If a pod dies, the Deployment recreates it (self-healing).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: horaamiga-api
   namespace: horaamiga
 spec:
-  replicas: 2                      # 2 copias: tolera a queda de uma sem ficar offline
+  replicas: 2                      # 2 copies: tolerates losing one without going offline
   selector:
     matchLabels:
       app: horaamiga-api
@@ -17,12 +17,14 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/diego-cruz-github/horaamiga-api:latest  # imagem vem do registry (CI builda e empurra)
+          # Pinned version tag - never :latest in production (no rollback target,
+          # and "latest" can silently change under you). CI bumps this tag.
+          image: ghcr.io/diego-cruz-github/horaamiga-api:v1.0.0
           ports:
             - containerPort: 3000
 
-          # Requests/limits: requests = o que o pod reserva; limits = teto.
-          # Sem isso, um pod pode sufocar os outros no mesmo no.
+          # Requests/limits: requests = what the pod reserves; limits = the cap.
+          # Without them, one pod can starve the others on the same node.
           resources:
             requests:
               cpu: "100m"
@@ -31,9 +33,9 @@ spec:
               cpu: "500m"
               memory: "256Mi"
 
-          # Probes: o K8s precisa saber 2 coisas diferentes.
-          # readiness = "ja posso receber trafego?" (so entra no Service quando pronto)
-          # liveness  = "ainda estou vivo?" (se travar, o K8s reinicia o pod)
+          # Probes: Kubernetes needs two different answers.
+          # readiness = "can I receive traffic yet?" (only joins the Service when ready)
+          # liveness  = "am I still alive?" (if stuck, Kubernetes restarts the pod)
           readinessProbe:
             httpGet:
               path: /api/health
@@ -47,7 +49,7 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 20
 
-          # Segredos vem de um Secret do cluster (referencia, nunca o valor aqui).
+          # Secrets come from a cluster Secret (a reference here, never the value).
           envFrom:
             - secretRef:
-                name: horaamiga-secrets   # criado fora do Git (ver secret.example.yaml)
+                name: horaamiga-secrets   # created outside Git (see secret.example.yaml)
