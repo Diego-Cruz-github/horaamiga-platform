@@ -1,0 +1,13 @@
+# Nao copiar pro contexto de build (deixa a imagem menor e evita vazar segredo).
+node_modules
+npm-debug.log
+.env
+.env.*
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
+*.md
+tests
+coverage
+.vscode

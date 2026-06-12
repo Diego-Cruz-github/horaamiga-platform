@@ -1,0 +1,23 @@
+# docker-compose para DESENVOLVIMENTO LOCAL.
+# Sobe a API igual a producao (mesma imagem), facilitando testar antes de deployar.
+# Os segredos vem de um .env local (nao versionado).
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../.env        # arquivo local, fora do Git
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+# Nota: em producao o banco e gerenciado (Supabase/PostgreSQL UE), entao nao sobe
+# container de banco aqui. Para um ambiente local 100% isolado, daria pra adicionar
+# um servico "postgres" - mantido fora pra refletir a arquitetura real.
