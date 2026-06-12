@@ -25,7 +25,7 @@ resource "aws_instance" "prod" {
   vpc_security_group_ids = [aws_security_group.web.id]
 
   root_block_device {
-    volume_size = 40    # GB - mirrors the Hetzner disk
+    volume_size = 40 # GB - mirrors the Hetzner disk
     volume_type = "gp3"
   }
 
