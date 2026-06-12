@@ -45,18 +45,21 @@ no formato Architecture Decision Record:
 - [0001 - Hetzner em vez de hyperscaler](docs/decisions/0001-hetzner-em-vez-de-hyperscaler.md)
 - [0002 - Gestao de segredos](docs/decisions/0002-gestao-de-segredos.md)
 - [0003 - IaC com Terraform e Ansible](docs/decisions/0003-iac-terraform-e-ansible.md)
+- [0004 - Containerizacao e Kubernetes (k3s)](docs/decisions/0004-containerizacao-e-kubernetes.md)
+- [0005 - Observabilidade self-hosted](docs/decisions/0005-observabilidade-self-hosted.md)
 
 ## Estrutura do repositorio
 
 ```
 .
 ├── docs/
-│   ├── architecture/      # Diagramas e descricao da arquitetura
+│   ├── architecture/      # Diagramas, descricao da arquitetura e portabilidade multi-cloud
 │   └── decisions/         # ADRs (Architecture Decision Records)
 ├── terraform/             # Provisionamento da infraestrutura (IaC)
 ├── ansible/               # Configuracao de servidor (idempotente)
-├── k8s/                   # Manifests Kubernetes (k3s)
-├── observability/         # Configuracao de Prometheus, Grafana, Loki
+├── docker/                # Dockerfile multi-stage + compose para dev local
+├── k8s/                   # Manifests Kubernetes (k3s): deployment, service, ingress, HPA
+├── observability/         # Prometheus, Grafana (dashboards), Loki, regras de alerta
 ├── scripts/               # Automacao operacional (backup, health-check)
 ├── .env.example           # Template de variaveis (sem valores reais)
 └── .gitignore
