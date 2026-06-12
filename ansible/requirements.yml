@@ -1,0 +1,6 @@
+# External collections used by the playbook.
+# Install with: ansible-galaxy collection install -r requirements.yml
+
+collections:
+  - name: community.general   # ufw module
+  - name: ansible.posix       # authorized_key module
