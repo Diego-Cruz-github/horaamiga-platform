@@ -1,38 +1,41 @@
-# ADR 0004 - Containerizacao e Kubernetes (k3s)
+# ADR 0004 - Containerization and Kubernetes (k3s)
 
-**Data:** 2026-06-12
+**Date:** 2026-06-12
 **Status:** Accepted
 
-## Contexto
+## Context
 
-A API hoje roda direto no servidor via PM2 (gerenciador de processos), o que funciona
-bem para o porte atual. Para padronizar empacotamento, portabilidade e escala futura,
-a evolucao desenhada e containerizar a API e orquestrar com Kubernetes.
+The API currently runs directly on the server under PM2 (process manager), which
+works well at the current scale. To standardize packaging, portability and future
+scaling, the designed evolution is to containerize the API and orchestrate it
+with Kubernetes.
 
-## Decisao
+## Decision
 
-- **Docker multi-stage** para empacotar a API: imagem pequena, sem ferramenta de build
-  no runtime, rodando como usuario nao-root.
-- **k3s** (Kubernetes leve, da Rancher) como orquestrador, em vez de Kubernetes completo
-  ou de um hyperscaler gerenciado. k3s roda confortavelmente em servidor pequeno e
-  entrega a mesma experiencia (pods, deployments, services, HPA, ingress).
-- Imagens publicadas no GHCR; o cluster puxa do registry (o build acontece no CI, nao
-  no servidor - por isso o host nem precisa de Docker).
+- **Multi-stage Docker build** for the API: small image, no build tooling in the
+  runtime layer, running as a non-root user.
+- **k3s** (lightweight Kubernetes by Rancher) as the orchestrator, instead of full
+  Kubernetes or a managed hyperscaler offering. k3s runs comfortably on a small
+  server and provides the same experience (pods, deployments, services, HPA, ingress).
+- Images published to GHCR; the cluster pulls from the registry (builds happen in
+  CI, not on the server - which is why the host does not even need Docker).
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Continuar so com PM2:** simples e suficiente hoje, mas nao da orquestracao, autoscaling
-  nem padroniza deploy para escala. Mantido como baseline; K8s e o passo de evolucao.
-- **EKS/GKE/AKS (K8s gerenciado):** control plane cobra fixo (~USD 73/mes na AWS) mesmo
-  ocioso. Para o porte atual e overkill de custo. k3s da o aprendizado e o resultado por
-  custo proximo de zero. A portabilidade pro gerenciado fica documentada (multi-cloud.md).
-- **Docker Compose em vez de K8s:** otimo pra dev local (e usado aqui), mas nao cobre
-  autoscaling/self-healing de producao.
+- **Staying on PM2 only:** simple and sufficient today, but provides no
+  orchestration, autoscaling or standardized deploys at scale. Kept as the baseline;
+  Kubernetes is the evolution step.
+- **EKS/GKE/AKS (managed Kubernetes):** the control plane bills a fixed fee
+  (~USD 73/month on AWS) even when idle. Overkill cost for the current scale. k3s
+  delivers the learning and the result at near-zero cost, and portability to managed
+  offerings is documented (multi-cloud.md).
+- **Docker Compose instead of Kubernetes:** great for local dev (and used here),
+  but does not cover production autoscaling/self-healing.
 
-## Consequencias
+## Consequences
 
-- Positivo: deploy padronizado e portavel; autoscaling (HPA) e self-healing; mesma stack
-  conceitual de qualquer cloud gerenciada.
-- Trade-off honesto: K8s e mais complexo que PM2 para 1 app de trafego baixo - aqui ele
-  entra como capacitacao e preparo para escala, nao por necessidade imediata. Decisao
-  consciente e documentada.
+- Positive: standardized, portable deploys; autoscaling (HPA) and self-healing;
+  the same conceptual stack as any managed cloud.
+- Honest trade-off: Kubernetes is more complex than PM2 for one low-traffic app -
+  here it serves as capability building and scale preparation, not immediate need.
+  A conscious, documented decision.

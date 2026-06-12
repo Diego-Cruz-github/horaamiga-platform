@@ -1,35 +1,41 @@
-# ADR 0002 - Gestao de segredos
+# ADR 0002 - Secrets management
 
-**Data:** 2026-06-10
+**Date:** 2026-06-10
 **Status:** Accepted
 
-## Contexto
+## Context
 
-A plataforma lida com dados pessoais de pessoas idosas sob GDPR e integra varios
-servicos externos (banco de dados, notificacoes, email), cada um com suas credenciais.
-Credenciais nao podem, em nenhuma hipotese, acabar no controle de versao - nem em
-repositorio privado, ja que um repositorio privado pode se tornar publico, ser clonado
-ou ter o acesso ampliado no futuro.
+The platform handles personal data of elderly users under GDPR and integrates
+several external services (database, notifications, email), each with its own
+credentials. Credentials must never end up in version control - not even in a
+private repository, since a private repository can become public, be cloned, or
+have its access widened in the future.
 
-## Decisao
+## Decision
 
-Os segredos vivem exclusivamente em um arquivo `.env` no servidor, fora do versionamento.
-O repositorio contem apenas um `.env.example` com as chaves e placeholders, nunca valores.
+Secrets live exclusively in a `.env` file on the server, outside version control.
+The repository contains only a `.env.example` with keys and placeholders, never values.
 
-A protecao e aplicada em camadas (shift-left), da mais cedo para a mais tardia:
+Protection is applied in layers (shift-left), from earliest to latest:
 
-1. `.gitignore` cobrindo `.env`, chaves, estado do Terraform e credenciais desde o primeiro commit.
-2. Secret scanning no fluxo de trabalho, para barrar um segredo antes de ele sair da maquina.
-3. `.env.example` como contrato do que precisa ser preenchido, sem expor nada.
-4. Procedimento de resposta a exposicao: rotacionar primeiro (gerar valor novo e invalidar o antigo),
-   limpar o historico depois. Rotacao e o que de fato neutraliza, porque quem ja clonou levou o valor antigo.
+1. `.gitignore` covering `.env`, keys, Terraform state and credentials from the first commit.
+2. Secret scanning in the workflow, to block a secret before it leaves the machine.
+3. `.env.example` as the contract of what must be filled in, without exposing anything.
+4. Exposure response procedure: rotate first (issue a new value and invalidate the old
+   one), clean history afterwards. Rotation is what actually neutralizes a leak, because
+   whoever already cloned the repository took the old value with them.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Segredos em variavel de ambiente do CI apenas:** cobre o pipeline, mas nao o desenvolvimento local. Mantido como complemento, nao como unica camada.
-- **Cofre dedicado (HashiCorp Vault / Secret Manager):** e o passo natural de evolucao quando o numero de servicos e ambientes crescer. Para o estagio atual, `.env` no servidor com disciplina de rotacao atende, com custo operacional menor.
+- **Secrets only in CI variables:** covers the pipeline but not local development.
+  Kept as a complement, not as the single layer.
+- **Dedicated vault (HashiCorp Vault / cloud secret manager):** the natural evolution
+  once the number of services and environments grows. At the current stage, `.env` on
+  the server with rotation discipline does the job at lower operational cost.
 
-## Consequencias
+## Consequences
 
-- Positivo: nenhum segredo no historico do repositorio; processo de rotacao definido; repositorio seguro para ser publico.
-- Trade-off: a disciplina depende de processo (gitignore + scanning + rotacao). Por isso as camadas sao automatizadas onde possivel, e nao deixadas a cargo da memoria de quem comita.
+- Positive: no secret in repository history; a defined rotation process; a repository
+  that is safe to make public.
+- Trade-off: discipline depends on process (gitignore + scanning + rotation). That is
+  why the layers are automated where possible instead of relying on whoever commits.

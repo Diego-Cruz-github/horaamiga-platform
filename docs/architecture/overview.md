@@ -1,25 +1,25 @@
-# Arquitetura - visao geral
+# Architecture - overview
 
-## Diagrama
+## Diagram
 
 ```
-                         Usuarios (PT / UE)
+                          Users (PT / EU)
                                 |
                   +---------------------------+
                   |        CLOUDFLARE         |
-                  |   DNS + CDN + protecao    |
+                  |  DNS + CDN + protection   |
                   +---------------------------+
                                 |
                   +---------------------------+
-                  |    VPS HETZNER (DE/UE)    |
+                  |    HETZNER VPS (DE/EU)    |
                   |                           |
                   |  +---------------------+  |
                   |  |       NGINX         |  |
-                  |  |  reverse proxy/SSL  |  |
+                  |  | reverse proxy / SSL |  |
                   |  +----------+----------+  |
                   |     |       |       |     |
                   |   site     PWA     API    |
-                  | (estatico)(estatico)|     |
+                  | (static) (static)   |     |
                   |                     |     |
                   |  +------------------v--+  |
                   |  |  Node.js (Express)  |  |
@@ -32,50 +32,56 @@
             |                           |                           |
    +--------v--------+        +--------v--------+        +--------v--------+
    |    SUPABASE     |        |    TELEGRAM     |        |     RESEND      |
-   | PostgreSQL (UE) |        | alertas em      |        | email (OTP de   |
-   | auth + realtime |        | tempo real      |        | autenticacao)   |
+   | PostgreSQL (EU) |        | real-time       |        | transactional   |
+   | auth + realtime |        | alerts          |        | email (OTP)     |
    +-----------------+        +-----------------+        +-----------------+
 ```
 
-## Componentes
+## Components
 
-| Componente | Papel | Observacao |
+| Component | Role | Notes |
 |---|---|---|
-| Cloudflare | DNS, CDN, camada de protecao | Na frente de todo o trafego |
-| Nginx | Reverse proxy, SSL (Let's Encrypt), serve os estaticos | Renovacao de certificado automatizada (cron) |
-| Node.js / Express | API REST: autenticacao, check-in, emergencia | PM2 em cluster (2 instancias) para usar os nucleos e sobreviver a crash de processo |
-| Workers (cron) | Monitoramento de check-ins atrasados e escalacao de alertas | O coracao do produto: se o idoso nao da sinal, o sistema age |
-| Supabase (PostgreSQL) | Dados, autenticacao OTP, realtime | Regiao UE; RLS (row level security) ativo |
-| Telegram | Canal de alerta em tempo real para familiares/voluntarios | Dois bots: alertas e servicos |
-| Resend | Email transacional (OTP de login) | Dominio verificado |
+| Cloudflare | DNS, CDN, protection layer | In front of all traffic |
+| Nginx | Reverse proxy, SSL (Let's Encrypt), serves static assets | Automated certificate renewal (cron) |
+| Node.js / Express | REST API: authentication, check-in, emergency | PM2 in cluster mode (2 instances) to use the cores and survive a process crash |
+| Workers (cron) | Monitor missed check-ins and escalate alerts | The heart of the product: if the elderly person gives no sign, the system acts |
+| Supabase (PostgreSQL) | Data, OTP authentication, realtime | EU region; RLS (row level security) enabled |
+| Telegram | Real-time alert channel for family/volunteers | Two bots: alerts and services |
+| Resend | Transactional email (login OTP) | Verified domain |
 
-## Operacao no servidor
+The platform serves two frontends from the same server: the institutional
+website (`horaamiga.pt`, static, trilingual PT/EN/ES) and the application
+(`app.horaamiga.pt`, PWA + API), routed by Nginx.
 
-- **Processos:** PM2 em modo cluster, com restart automatico em falha.
-- **Backups:** diarios, automatizados via cron, com retencao; verificacao por script (`scripts/`).
-- **Health-check:** verificacao periodica via cron com log dedicado.
-- **Seguranca de host:** firewall (UFW) com portas minimas, fail2ban contra brute-force de SSH,
-  acesso somente por chave.
-- **SSL:** Let's Encrypt com renovacao automatica.
+## Server operations
 
-## Conformidade (GDPR)
+- **Processes:** PM2 in cluster mode, automatic restart on failure.
+- **Backups:** daily, automated via cron, with retention; verified by script (`scripts/`).
+- **Health-check:** periodic cron check with a dedicated log.
+- **Host security:** firewall (UFW) with minimal ports, fail2ban against SSH
+  brute-force, key-only access.
+- **SSL:** Let's Encrypt with automatic renewal.
 
-- Toda a hospedagem em territorio UE (Hetzner Alemanha, Supabase regiao UE).
-- Minimizacao de dados: o sistema coleta o necessario para o servico de cuidado.
-- Logs de auditoria; politica de privacidade e termos publicados no site (PT/EN/ES).
+## Compliance (GDPR)
 
-## Evolucao planejada
+- All hosting on EU soil (Hetzner Germany, Supabase EU region).
+- Data minimization: the system collects what the care service needs.
+- Audit logs; privacy policy and terms published on the website (PT/EN/ES).
 
-A base atual roda em bare metal gerenciado manualmente. A evolucao desenhada,
-nesta ordem:
+## Planned evolution
 
-1. **IaC:** provisionamento em Terraform (servidor, firewall, DNS) e configuracao em
-   Ansible (idempotente), tornando o ambiente reproduzivel do zero.
-2. **Containerizacao:** empacotar a API em imagem Docker multi-stage.
-3. **Orquestracao:** k3s (Kubernetes enxuto, adequado ao porte) com health probes e autoscaling horizontal.
-4. **Observabilidade:** Prometheus (metricas), Grafana (dashboards), Loki (logs centralizados),
-   com alertas roteados para o Telegram ja integrado.
-5. **Multi-cloud:** documentacao de portabilidade com mapeamento de servicos equivalentes
-   em AWS/Azure/GCP (ver `docs/architecture/`).
+The current base runs on a manually managed server. The designed evolution,
+in order:
 
-Cada etapa entra neste repositorio conforme implementada, com a decisao registrada em ADR.
+1. **IaC:** provisioning in Terraform (server, firewall, DNS) and configuration in
+   Ansible (idempotent), making the environment reproducible from scratch.
+2. **Containerization:** package the API as a multi-stage Docker image.
+3. **Orchestration:** k3s (lightweight Kubernetes, suited to this scale) with health
+   probes and horizontal autoscaling.
+4. **Observability:** Prometheus (metrics), Grafana (dashboards), Loki (centralized
+   logs), with alerts routed to the already-integrated Telegram.
+5. **Multi-cloud:** portability documentation mapping equivalent services on
+   AWS/Azure/GCP (see `multi-cloud.md`).
+
+Each step lands in this repository as it is implemented, with the decision
+recorded as an ADR.

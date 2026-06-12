@@ -1,77 +1,77 @@
-# HoraAmiga - Plataforma de Cuidado Social (Arquitetura e Infraestrutura)
+# HoraAmiga - Social Care Platform (Architecture & Infrastructure)
 
-Plataforma de cuidado social para pessoas idosas em Portugal: check-in diario e
-botao de emergencia, com alertas em cascata para familiares e voluntarios.
-Incubada pela Human Power Hub (Portugal 2030 / Uniao Europeia).
+Social care platform for elderly people in Portugal: daily check-in and an
+emergency button, with cascading alerts to family members and volunteers.
+Incubated by Human Power Hub (Portugal 2030 / European Union).
 
-- Site institucional: https://horaamiga.pt
-- Aplicacao (PWA): https://app.horaamiga.pt
+- Website: https://horaamiga.pt
+- App (PWA): https://app.horaamiga.pt
 
-## Sobre este repositorio
+## About this repository
 
-Este repositorio documenta a **arquitetura e a camada de infraestrutura/DevOps** da
-plataforma: provisionamento, configuracao de servidor, containerizacao, observabilidade
-e decisoes tecnicas (ADRs).
+This repository documents the **architecture and the infrastructure/DevOps layer**
+of the platform: provisioning, server configuration, containerization,
+observability and technical decisions (ADRs).
 
-O **codigo da aplicacao (backend e dados de utentes) e privado**, por se tratar de uma
-plataforma em producao que lida com dados pessoais sob GDPR. O que esta aqui e a
-engenharia de plataforma, sanitizada: sem segredos, sem dados pessoais.
+The **application code (backend and user data) is private**, since this is a
+production platform handling personal data under GDPR. What lives here is the
+platform engineering, sanitized: no secrets, no personal data.
 
 ## Stack
 
-| Camada | Tecnologia |
+| Layer | Technology |
 |---|---|
-| Infraestrutura | Hetzner (Alemanha, GDPR), Cloudflare (DNS/CDN/WAF) |
-| Provisionamento | Terraform |
-| Configuracao | Ansible |
-| Aplicacao | Node.js, Express, PostgreSQL (Supabase) |
-| Servidor web | Nginx (reverse proxy), SSL Let's Encrypt |
-| Processos | PM2 (cluster mode) |
-| Containerizacao | Docker (multi-stage) |
-| Orquestracao | Kubernetes (k3s) |
-| Observabilidade | Prometheus, Grafana, Loki |
-| Automacao | Scripts em Python (backup, health-check) |
+| Infrastructure | Hetzner (Germany, GDPR), Cloudflare (DNS/CDN/WAF) |
+| Provisioning | Terraform |
+| Configuration | Ansible |
+| Application | Node.js, Express, PostgreSQL (Supabase) |
+| Web server | Nginx (reverse proxy), Let's Encrypt SSL |
+| Process manager | PM2 (cluster mode) |
+| Containerization | Docker (multi-stage) |
+| Orchestration | Kubernetes (k3s) |
+| Observability | Prometheus, Grafana, Loki |
+| Automation | Python scripts (backup, health-check) |
 
-## Arquitetura
+## Architecture
 
-Ver [`docs/architecture/overview.md`](docs/architecture/overview.md) para o diagrama
-e a descricao dos componentes e fluxos.
+See [`docs/architecture/overview.md`](docs/architecture/overview.md) for the
+diagram, components and flows. Cloud portability is mapped in
+[`docs/architecture/multi-cloud.md`](docs/architecture/multi-cloud.md).
 
-## Decisoes tecnicas (ADRs)
+## Technical decisions (ADRs)
 
-As decisoes de arquitetura estao registradas em [`docs/decisions/`](docs/decisions/),
-no formato Architecture Decision Record:
+Architecture decisions are recorded in [`docs/decisions/`](docs/decisions/):
 
-- [0001 - Hetzner em vez de hyperscaler](docs/decisions/0001-hetzner-em-vez-de-hyperscaler.md)
-- [0002 - Gestao de segredos](docs/decisions/0002-gestao-de-segredos.md)
-- [0003 - IaC com Terraform e Ansible](docs/decisions/0003-iac-terraform-e-ansible.md)
-- [0004 - Containerizacao e Kubernetes (k3s)](docs/decisions/0004-containerizacao-e-kubernetes.md)
-- [0005 - Observabilidade self-hosted](docs/decisions/0005-observabilidade-self-hosted.md)
+- [0001 - Hetzner over a hyperscaler](docs/decisions/0001-hetzner-em-vez-de-hyperscaler.md)
+- [0002 - Secrets management](docs/decisions/0002-gestao-de-segredos.md)
+- [0003 - IaC with Terraform and Ansible](docs/decisions/0003-iac-terraform-e-ansible.md)
+- [0004 - Containerization and Kubernetes (k3s)](docs/decisions/0004-containerizacao-e-kubernetes.md)
+- [0005 - Self-hosted observability](docs/decisions/0005-observabilidade-self-hosted.md)
 
-## Estrutura do repositorio
+## Repository layout
 
 ```
 .
 ├── docs/
-│   ├── architecture/      # Diagramas, descricao da arquitetura e portabilidade multi-cloud
+│   ├── architecture/      # Diagrams, component description, multi-cloud portability
 │   └── decisions/         # ADRs (Architecture Decision Records)
-├── terraform/             # Provisionamento da infraestrutura (IaC)
-├── ansible/               # Configuracao de servidor (idempotente)
-├── docker/                # Dockerfile multi-stage + compose para dev local
-├── k8s/                   # Manifests Kubernetes (k3s): deployment, service, ingress, HPA
-├── observability/         # Prometheus, Grafana (dashboards), Loki, regras de alerta
-├── scripts/               # Automacao operacional (backup, health-check)
-├── .env.example           # Template de variaveis (sem valores reais)
+├── terraform/             # Infrastructure provisioning (IaC)
+├── ansible/               # Server configuration (idempotent)
+├── docker/                # Multi-stage Dockerfile + compose for local dev
+├── k8s/                   # Kubernetes manifests (k3s): deployment, service, ingress, HPA
+├── observability/         # Prometheus, Grafana dashboards, Loki, alert rules
+├── scripts/               # Operational automation (backup, health-check)
+├── .env.example           # Environment template (no real values)
 └── .gitignore
 ```
 
-## Configuracao
+## Configuration
 
-As variaveis de ambiente sao carregadas de um arquivo `.env` que **nunca e versionado**.
-Use [`.env.example`](.env.example) como referencia das chaves necessarias. Os valores
-reais ficam apenas no servidor.
+Environment variables are loaded from a `.env` file that is **never committed**.
+Use [`.env.example`](.env.example) as the reference for required keys. Real
+values live only on the server.
 
-## Licenca
+## License
 
-Codigo de infraestrutura sob licenca MIT. Conteudo, marca e codigo de aplicacao do
-HoraAmiga sao reservados.
+Infrastructure code under the [MIT license](LICENSE). HoraAmiga content, brand
+and application code are reserved.

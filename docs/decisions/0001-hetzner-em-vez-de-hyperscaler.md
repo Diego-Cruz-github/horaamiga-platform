@@ -1,34 +1,37 @@
-# ADR 0001 - Hetzner em vez de hyperscaler
+# ADR 0001 - Hetzner over a hyperscaler
 
-**Data:** 2026-06-10
+**Date:** 2026-06-10
 **Status:** Accepted
 
-## Contexto
+## Context
 
-A plataforma precisa rodar na Uniao Europeia (GDPR), com custo previsivel e baixo -
-e um projeto social incubado, nao uma operacao com orcamento de cloud corporativa.
-O trafego e modesto e estavel (publico inicial: idosos em Braga e regiao), sem picos
-que justifiquem elasticidade automatica de hyperscaler.
+The platform must run in the European Union (GDPR), with low and predictable
+cost - it is an incubated social project, not an operation with an enterprise
+cloud budget. Traffic is modest and stable (initial audience: elderly people in
+the Braga region), with no spikes that would justify hyperscaler auto-elasticity.
 
-## Decisao
+## Decision
 
-Infraestrutura em VPS Hetzner (datacenter na Alemanha), com Cloudflare na frente
-(DNS, CDN e protecao). Banco de dados gerenciado (Supabase, regiao UE) para nao
-operar PostgreSQL na mao neste estagio.
+Run on Hetzner VPS (datacenter in Germany), with Cloudflare in front
+(DNS, CDN and protection). Managed database (Supabase, EU region) so we do not
+operate PostgreSQL by hand at this stage.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **AWS/GCP/Azure:** o equivalente funcional (instancia + load balancer + NAT + banco gerenciado)
-  custa varias vezes mais por mes para o mesmo resultado neste porte. Servicos gerenciados
-  valem o preco quando ha equipe e escala que os justifique; aqui seriam custo sem retorno.
-- **Self-hosted total (banco incluso):** maior controle, porem backup, replicacao e upgrade
-  de banco viram responsabilidade operacional de uma pessoa. O banco gerenciado reduz esse risco.
+- **AWS/GCP/Azure:** the functional equivalent (instance + load balancer + NAT +
+  managed database) costs several times more per month for the same result at this
+  scale. Managed services earn their price when there is a team and scale to justify
+  them; here they would be cost without return.
+- **Fully self-hosted (database included):** more control, but backup, replication
+  and database upgrades become a one-person operational liability. The managed
+  database removes that risk.
 
-## Consequencias
+## Consequences
 
-- Positivo: custo mensal baixo e previsivel; dados em territorio europeu; stack simples de operar solo.
-- Trade-off: sem elasticidade automatica - escalar significa redimensionar o servidor ou adicionar
-  um segundo no (decisao consciente, documentada para revisao quando o trafego justificar).
-- A arquitetura e portavel: os componentes (compute, banco PostgreSQL, DNS/CDN, storage)
-  tem equivalente direto em qualquer hyperscaler, entao a migracao futura e uma troca de
-  provedor, nao um redesenho.
+- Positive: low, predictable monthly cost; data on European soil; a stack that one
+  person can operate.
+- Trade-off: no auto-elasticity - scaling means resizing the server or adding a
+  second node (a conscious decision, documented for review when traffic justifies it).
+- The architecture is portable: every component (compute, PostgreSQL, DNS/CDN,
+  storage) has a direct equivalent in any hyperscaler, so a future migration is a
+  provider swap, not a redesign. See `docs/architecture/multi-cloud.md`.

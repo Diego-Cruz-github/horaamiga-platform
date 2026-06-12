@@ -1,32 +1,34 @@
-# Observabilidade
+# Observability
 
-Stack self-hosted, escolhida por custo e por caber em servidor pequeno:
+Self-hosted stack, chosen for cost and for fitting a small server:
 
-| Ferramenta | Papel |
+| Tool | Role |
 |---|---|
-| **Prometheus** | Coleta de metricas (scrape a cada 15s) |
-| **Grafana** | Dashboards (versionados como codigo, em `grafana/dashboards/`) |
-| **Loki** | Agregacao de logs (alternativa leve ao ELK - Elasticsearch nao cabe) |
-| **Alertmanager** | Roteia alertas pro Telegram (reusa o bot ja existente) |
+| **Prometheus** | Metrics collection (15s scrape) |
+| **Grafana** | Dashboards (versioned as code, in `grafana/dashboards/`) |
+| **Loki** | Log aggregation (lightweight alternative to ELK) |
+| **Alertmanager** | Routes alerts to Telegram (reuses the existing bot) |
 
-## Metricas RED
+## RED metrics
 
-O foco sao as tres metricas RED, que respondem "a aplicacao esta saudavel?":
+The focus is on the three RED metrics, which answer "is the application healthy?":
 
-- **Rate** - requisicoes por segundo
-- **Errors** - taxa de respostas 5xx
-- **Duration** - latencia (p95)
+- **Rate** - requests per second
+- **Errors** - rate of 5xx responses
+- **Duration** - latency (p95)
 
-A API expoe `/metrics` via `prom-client` (Node). O `node-exporter` expoe CPU/RAM/disco do host.
+The API exposes `/metrics` via `prom-client` (Node). `node-exporter` exposes
+host CPU/RAM/disk.
 
-## Por que self-hosted e nao Datadog/New Relic
+## Why self-hosted instead of Datadog/New Relic
 
-Datadog e New Relic sao excelentes, mas cobram por host/volume. Pro porte e o orcamento
-do projeto, Grafana + Prometheus + Loki entregam o mesmo valor essencial com custo zero
-de licenca - e mostram dominio da camada que esta por baixo do SaaS. Em ambiente com
-orcamento, a leitura mudaria (SaaS poupa tempo de operacao).
+Datadog and New Relic are excellent but bill per host/volume. At this project's
+scale and budget, Grafana + Prometheus + Loki deliver the same essential value
+with zero licensing cost - and demonstrate command of the layer that sits
+underneath the SaaS. With a budget, the trade-off changes (SaaS buys back
+operations time).
 
 ## Status
 
-Esta pasta contem a CONFIGURACAO (infra as code da observabilidade). A stack roda no
-ambiente real quando o lab e aplicado - aqui fica o blueprint versionado.
+This folder contains the CONFIGURATION (observability as code). The stack runs
+in the target environment when applied - this is the versioned blueprint.

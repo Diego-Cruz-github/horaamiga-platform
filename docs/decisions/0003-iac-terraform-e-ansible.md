@@ -1,46 +1,47 @@
-# ADR 0003 - IaC com Terraform e Ansible
+# ADR 0003 - IaC with Terraform and Ansible
 
-**Data:** 2026-06-11
+**Date:** 2026-06-11
 **Status:** Accepted
 
-## Contexto
+## Context
 
-A infraestrutura foi inicialmente configurada de forma manual (imperativa) no servidor.
-Isso funciona, mas tem dois problemas: nao e reproduzivel (se o servidor for perdido, a
-reconstrucao depende de memoria e de passos manuais) e nao e auditavel (nao da pra ver
-em codigo o que existe e por que). Para uma plataforma em producao, a infra precisa ser
-codigo: versionada, revisavel e recriavel.
+The infrastructure was initially configured by hand (imperatively) on the server.
+That works, but has two problems: it is not reproducible (if the server is lost,
+rebuilding depends on memory and manual steps) and it is not auditable (you cannot
+see in code what exists and why). For a production platform, infrastructure must
+be code: versioned, reviewable and recreatable.
 
-## Decisao
+## Decision
 
-Dividir a responsabilidade em duas ferramentas, cada uma no que faz melhor:
+Split responsibility between two tools, each doing what it does best:
 
-- **Terraform** provisiona o que e recurso de nuvem com estado: a VM, o firewall de borda,
-  a chave SSH e os registros DNS. Terraform mantem state, entao sabe o que existe e calcula
-  a diferenca antes de aplicar.
-- **Ansible** configura o que esta dentro do servidor: pacotes, Nginx, Node, PM2, Certbot e
-  o hardening. Ansible e idempotente e sem estado - roda quantas vezes precisar e converge
-  pro mesmo resultado.
+- **Terraform** provisions stateful cloud resources: the VM, the edge firewall,
+  the SSH key and the DNS records. Terraform keeps state, so it knows what exists
+  and computes the diff before applying.
+- **Ansible** configures what lives inside the server: packages, Nginx, Node, PM2,
+  Certbot and hardening. Ansible is idempotent and stateless - run it as many times
+  as needed and it converges to the same result.
 
-Fluxo: Terraform cria a VM e expoe o IP (output) -> Ansible recebe esse IP e configura o
-servidor por dentro.
+Flow: Terraform creates the VM and outputs the IP -> Ansible takes that IP and
+configures the server from the inside.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- **Tudo em Ansible (inclusive criar a VM):** o Ansible ate cria recurso de nuvem, mas nao
-  guarda state - ele nao sabe o que ja existe, entao gerenciar ciclo de vida de infra fica
-  fragil. Provisionamento de recurso com estado e trabalho de Terraform.
-- **Tudo em Terraform (inclusive configurar o servidor):** da pra rodar script via Terraform,
-  mas configuracao de SO repetivel e idempotente e o terreno do Ansible. Misturar as duas
-  responsabilidades deixa o codigo confuso.
-- **Pulumi em vez de Terraform:** ecossistema menor; Terraform tem mais providers maduros e
-  e o padrao de mercado pra esse tipo de infra.
+- **Everything in Ansible (VM creation included):** Ansible can create cloud
+  resources, but it keeps no state - it does not know what already exists, so
+  managing infrastructure lifecycle becomes fragile. Stateful provisioning is
+  Terraform's job.
+- **Everything in Terraform (server configuration included):** you can run scripts
+  through Terraform, but repeatable, idempotent OS configuration is Ansible's
+  territory. Mixing the two responsibilities muddies the code.
+- **Pulumi instead of Terraform:** smaller ecosystem; Terraform has more mature
+  providers and is the market standard for this kind of infrastructure.
 
-## Consequencias
+## Consequences
 
-- Positivo: infra reproduzivel e auditavel; servidor recriavel do zero a partir do codigo;
-  separacao clara de responsabilidades (provisionar x configurar).
-- Trade-off: duas ferramentas pra manter em vez de uma. Aceitavel - cada uma resolve um
-  problema diferente, e juntas cobrem o ciclo completo.
-- O state do Terraform contem dados sensiveis (IPs, ids): fica fora do versionamento
-  (.gitignore) e, em time, iria pra backend remoto com lock.
+- Positive: reproducible, auditable infrastructure; server recreatable from code;
+  clear separation of concerns (provision vs configure).
+- Trade-off: two tools to maintain instead of one. Acceptable - each solves a
+  different problem, and together they cover the full lifecycle.
+- Terraform state contains sensitive data (IPs, ids): it stays out of version
+  control (.gitignore) and, with a team, would move to a remote backend with locking.
