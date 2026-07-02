@@ -7,7 +7,6 @@ botão de emergência, com alertas em cascata para familiares e voluntários.
 Incubada pela Human Power Hub (Portugal 2030 / União Europeia).
 
 - Site: https://horaamiga.pt
-- Aplicação (PWA): https://app.horaamiga.pt
 
 ## Sobre este repositório
 
