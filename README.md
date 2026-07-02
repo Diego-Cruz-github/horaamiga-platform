@@ -6,7 +6,6 @@ emergency button, with cascading alerts to family members and volunteers.
 Incubated by Human Power Hub (Portugal 2030 / European Union).
 
 - Website: https://horaamiga.pt
-- App (PWA): https://app.horaamiga.pt
 
 ## About this repository
 
