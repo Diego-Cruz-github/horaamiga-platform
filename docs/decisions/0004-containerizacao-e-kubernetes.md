@@ -27,7 +27,7 @@ with Kubernetes.
   Kubernetes is the evolution step.
 - **EKS/GKE/AKS (managed Kubernetes):** the control plane bills a fixed fee
   (~USD 73/month on AWS) even when idle. Overkill cost for the current scale. k3s
-  delivers the learning and the result at near-zero cost, and portability to managed
+  delivers the result at near-zero cost, and portability to managed
   offerings is documented (multi-cloud.md).
 - **Docker Compose instead of Kubernetes:** great for local dev (and used here),
   but does not cover production autoscaling/self-healing.
@@ -37,5 +37,5 @@ with Kubernetes.
 - Positive: standardized, portable deploys; autoscaling (HPA) and self-healing;
   the same conceptual stack as any managed cloud.
 - Honest trade-off: Kubernetes is more complex than PM2 for one low-traffic app -
-  here it serves as capability building and scale preparation, not immediate need.
+  here it serves as scale preparation ahead of immediate need.
   A conscious, documented decision.

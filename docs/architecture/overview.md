@@ -68,20 +68,18 @@ website (`horaamiga.pt`, static, trilingual PT/EN/ES) and the application
 - Data minimization: the system collects what the care service needs.
 - Audit logs; privacy policy and terms published on the website (PT/EN/ES).
 
-## Planned evolution
+## Platform layers (in this repository)
 
-The current base runs on a manually managed server. The designed evolution,
-in order:
+The platform layer is codified in this repository, each layer with its
+decision recorded as an ADR:
 
 1. **IaC:** provisioning in Terraform (server, firewall, DNS) and configuration in
    Ansible (idempotent), making the environment reproducible from scratch.
-2. **Containerization:** package the API as a multi-stage Docker image.
+2. **Containerization:** the API packaged as a multi-stage Docker image.
 3. **Orchestration:** k3s (lightweight Kubernetes, suited to this scale) with health
    probes and horizontal autoscaling.
 4. **Observability:** Prometheus (metrics), Grafana (dashboards), Loki (centralized
    logs), with alerts routed to the already-integrated Telegram.
-5. **Multi-cloud:** portability documentation mapping equivalent services on
-   AWS/Azure/GCP (see `multi-cloud.md`).
-
-Each step lands in this repository as it is implemented, with the decision
-recorded as an ADR.
+5. **Multi-cloud:** portability proven in code with the AWS port
+   ([terraform/aws](../../terraform/aws)) and mapped for GCP/Azure
+   (see `multi-cloud.md`).

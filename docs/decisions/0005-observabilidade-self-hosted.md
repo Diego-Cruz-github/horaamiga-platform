@@ -32,5 +32,5 @@ Duration) of the API.
 - Positive: zero licensing cost; mastery of the layer underneath observability
   SaaS; alerts reusing the Telegram integration that already exists.
 - Trade-off: operating the stack (upgrades, retention, storage) is our own
-  responsibility - a SaaS outsources that. Acceptable for the cost and the learning.
+  responsibility - a SaaS outsources that. Acceptable at this scale.
 - Short log retention (7 days in Loki) to avoid filling the small server's disk.

@@ -24,11 +24,5 @@ host CPU/RAM/disk.
 
 Datadog and New Relic are excellent but bill per host/volume. At this project's
 scale and budget, Grafana + Prometheus + Loki deliver the same essential value
-with zero licensing cost - and demonstrate command of the layer that sits
-underneath the SaaS. With a budget, the trade-off changes (SaaS buys back
-operations time).
-
-## Status
-
-This folder contains the CONFIGURATION (observability as code). The stack runs
-in the target environment when applied - this is the versioned blueprint.
+with zero licensing cost, operating directly the layer that a SaaS abstracts
+away. With a budget, the trade-off changes (SaaS buys back operations time).
