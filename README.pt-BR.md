@@ -2,6 +2,8 @@
 
 > [English](README.md) | **Português (BR)**
 
+[![ci](https://github.com/Diego-Cruz-github/horaamiga-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/Diego-Cruz-github/horaamiga-platform/actions/workflows/ci.yml)
+
 Plataforma de cuidado social para pessoas idosas em Portugal: check-in diário e
 botão de emergência, com alertas em cascata para familiares e voluntários.
 Incubada pela Human Power Hub (Portugal 2030 / União Europeia).
@@ -32,6 +34,7 @@ aqui é a engenharia de plataforma, sanitizada: sem segredos, sem dados pessoais
 | Orquestração | Kubernetes (k3s) |
 | Observabilidade | Prometheus, Grafana, Loki |
 | Automação | Scripts Python (backup, health-check) |
+| CI | GitHub Actions ([ci.yml](.github/workflows/ci.yml)): Terraform validate, Ansible check, lint do Dockerfile, schema k8s, varredura de segredos; [port Azure DevOps](azure-pipelines.yml) |
 | Portabilidade cloud | Port Terraform AWS ([terraform/aws](terraform/aws)); mapeamento GCP/Azure ([multi-cloud.md](docs/architecture/multi-cloud.md)) |
 
 ## Arquitetura

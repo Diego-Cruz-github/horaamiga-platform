@@ -1,0 +1,76 @@
+# CI - quality and security gates for the platform layer.
+# Every push/PR runs five independent gates, in parallel:
+#   terraform  - fmt + validate on both stacks (Hetzner live, AWS port)
+#   ansible    - playbook syntax check (roles and collections resolve)
+#   dockerfile - lint (hadolint)
+#   k8s        - manifest schema validation (kubeconform, strict)
+#   secrets    - full-history secret scan (gitleaks) - shift-left security
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        stack: [hetzner, aws]
+    defaults:
+      run:
+        working-directory: terraform/${{ matrix.stack }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: fmt (style is enforced, not opinion)
+        run: terraform fmt -check -recursive
+      - name: init (providers only, no backend/state)
+        run: terraform init -backend=false -input=false
+      - name: validate
+        run: terraform validate
+
+  ansible:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ansible
+    steps:
+      - uses: actions/checkout@v4
+      - name: install ansible-core
+        run: pip install ansible-core
+      - name: install required collections
+        run: ansible-galaxy collection install -r requirements.yml
+      - name: playbook syntax check
+        run: ansible-playbook -i inventory.ini.example --syntax-check playbook.yml
+
+  dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: docker/Dockerfile
+          failure-threshold: warning
+
+  k8s:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: kubeconform (schema validation, strict)
+        uses: docker://ghcr.io/yannh/kubeconform:v0.6.7
+        with:
+          args: -strict -summary k8s/
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history: a secret leaked in the past is still a leak
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,6 +1,8 @@
 # HoraAmiga - Social Care Platform (Architecture & Infrastructure)
 > **English** | [Português (BR)](README.pt-BR.md)
 
+[![ci](https://github.com/Diego-Cruz-github/horaamiga-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/Diego-Cruz-github/horaamiga-platform/actions/workflows/ci.yml)
+
 Social care platform for elderly people in Portugal: daily check-in and an
 emergency button, with cascading alerts to family members and volunteers.
 Incubated by Human Power Hub (Portugal 2030 / European Union).
@@ -31,6 +33,7 @@ platform engineering, sanitized: no secrets, no personal data.
 | Orchestration | Kubernetes (k3s) |
 | Observability | Prometheus, Grafana, Loki |
 | Automation | Python scripts (backup, health-check) |
+| CI | GitHub Actions ([ci.yml](.github/workflows/ci.yml)): Terraform validate, Ansible check, Dockerfile lint, k8s schema, secret scan; [Azure DevOps port](azure-pipelines.yml) |
 | Cloud portability | AWS Terraform port ([terraform/aws](terraform/aws)); GCP/Azure mapping ([multi-cloud.md](docs/architecture/multi-cloud.md)) |
 
 ## Architecture

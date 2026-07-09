@@ -1,0 +1,65 @@
+# Azure DevOps port of the CI pipeline (.github/workflows/ci.yml): the same
+# gates expressed in Azure Pipelines syntax (stages/jobs/steps). Same
+# portability pattern as the AWS Terraform port (ADR 0006): one live
+# implementation plus a codified equivalent, so switching platforms is a
+# config change, not a redesign.
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Validate
+    displayName: Quality and security gates
+    jobs:
+      - job: terraform
+        displayName: terraform fmt + validate
+        strategy:
+          matrix:
+            hetzner:
+              stackDir: terraform/hetzner
+            aws:
+              stackDir: terraform/aws
+        steps:
+          - script: terraform fmt -check -recursive
+            workingDirectory: $(stackDir)
+            displayName: fmt
+          - script: |
+              terraform init -backend=false -input=false
+              terraform validate
+            workingDirectory: $(stackDir)
+            displayName: init + validate
+
+      - job: ansible
+        displayName: ansible syntax check
+        steps:
+          - script: pip install ansible-core
+            displayName: install ansible-core
+          - script: |
+              ansible-galaxy collection install -r requirements.yml
+              ansible-playbook -i inventory.ini.example --syntax-check playbook.yml
+            workingDirectory: ansible
+            displayName: collections + syntax check
+
+      - job: dockerfile
+        displayName: dockerfile lint
+        steps:
+          - script: docker run --rm -i hadolint/hadolint hadolint --failure-threshold warning - < docker/Dockerfile
+            displayName: hadolint
+
+      - job: k8s
+        displayName: k8s schema validation
+        steps:
+          - script: docker run --rm -v $(pwd):/work ghcr.io/yannh/kubeconform:v0.6.7 -strict -summary /work/k8s
+            displayName: kubeconform
+
+      - job: secrets
+        displayName: secret scan (full history)
+        steps:
+          - checkout: self
+            fetchDepth: 0
+          - script: docker run --rm -v $(pwd):/work zricethezav/gitleaks:latest detect --source /work --log-opts="--all"
+            displayName: gitleaks
